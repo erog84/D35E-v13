@@ -66,7 +66,7 @@ export class ActorPF extends Actor {
   /* -------------------------------------------- */
 
   get isCharacterType() {
-    return this.data.type !== 'trap' && this.data.type !== 'object';
+    return this.type !== 'trap' && this.type !== 'object';
   }
 
   isInvisible() {
@@ -846,7 +846,7 @@ export class ActorPF extends Actor {
 
     if (item.system.uses != null && item.system.activation != null &&
         item.system.activation.type !== '') {
-      const itemTag = createTag(item.data.name);
+      const itemTag = createTag(item.name);
       const itemCustomTag = createTag(item.system.customTag);
       let curUses = item.system.uses;
 
@@ -902,7 +902,7 @@ export class ActorPF extends Actor {
         item.system.activation != null &&
         item.system.activation.type !== ''
     ) {
-      const itemTag = createTag(item.data.name);
+      const itemTag = createTag(item.name);
       let curUses = item.system.uses;
 
       if (getProperty(this.system, 'resources') == null) setProperty(
@@ -994,7 +994,7 @@ export class ActorPF extends Actor {
       return ui.notifications.warn(
           game.i18n.localize('D35E.ErrorNoActorPermission'));
 
-    if (item.data.type !== 'feat') throw new Error('Wrong Item type');
+    if (item.type !== 'feat') throw new Error('Wrong Item type');
     let spellsToAdd = [];
     for (let spell of Object.values(item.system.spellSpecialization.spells)) {
       let itemData = null;
@@ -1134,7 +1134,7 @@ export class ActorPF extends Actor {
     }
     attackData['type'] = 'attack';
     attackData['name'] = identified
-        ? item.data.name
+        ? item.name
         : item.system.unidentified.name;
     attackData['system.masterwork'] = item.system.masterwork;
     attackData['system.attackType'] = 'weapon';
@@ -1161,7 +1161,7 @@ export class ActorPF extends Actor {
     attackData['system.originalWeaponCreated'] = true;
     attackData['system.originalWeaponId'] = item._id;
     attackData['system.originalWeaponName'] = identified
-        ? item.data.name
+        ? item.name
         : item.system.unidentified.name;
     attackData['system.originalWeaponImg'] = item.img;
     attackData['system.originalWeaponProperties'] = item.system.properties;
@@ -1174,7 +1174,7 @@ export class ActorPF extends Actor {
         false;
     attackData['system.alignment.lawful'] = item.system.weaponData.alignment?.lawful ||
         false;
-    attackData['img'] = item.data.img;
+    attackData['img'] = item.img;
 
     attackData['system.nonLethal'] = item.system.properties.nnl;
     attackData['system.thrown'] = item.system.properties.thr;
@@ -1344,7 +1344,7 @@ export class ActorPF extends Actor {
     //LogHelper.log('Created attack for', item)
 
     ui.notifications.info(game.i18n.localize('D35E.NotificationCreatedAttack').
-        format(item.data.name));
+        format(item.name));
     return createdAttack;
   }
 
@@ -1625,7 +1625,7 @@ export class ActorPF extends Actor {
       const tokens = this.isToken ? [this.token] : this.getActiveTokens();
       const createData = tokens.reduce((arr, t) => {
         if (t.inCombat) return arr;
-        arr.push({tokenId: t.id, hidden: t.data.hidden});
+        arr.push({tokenId: t.id, hidden: t.document.hidden});
         return arr;
       }, []);
       await combat.createEmbeddedDocuments('Combatant', createData);
@@ -3941,7 +3941,7 @@ export class ActorPF extends Actor {
     return pack.getDocument(entryId).then((ent) => {
       //LogHelper.log(`${vtt} | Importing Item ${ent.name} from ${collection}`);
 
-      let data = ent.data.toObject();
+      let data = ent.toObject();
       if (this.sheet != null && this.sheet.rendered) {
         data = mergeObject(data, this.sheet.getDropData(data));
       }
@@ -4748,7 +4748,7 @@ export class ActorPF extends Actor {
         //LogHelper.log(action)
         if (action.parameters.length === 1) {
           let macroToRun = MacroDirectory.collection.find(
-              (x) => x.data.name === cleanParam(action.parameters[0]));
+              (x) => x.name === cleanParam(action.parameters[0]));
           if (!macroToRun) {
             ui.notifications.error(
                 game.i18n.format('D35E.ErrorActionFormula', {
@@ -4773,7 +4773,7 @@ export class ActorPF extends Actor {
         //LogHelper.log(action)
         if (action.parameters.length === 1) {
           let rollTable = RollTableDirectory.collection.find(
-              (x) => x.data.name === cleanParam(action.parameters[0]));
+              (x) => x.name === cleanParam(action.parameters[0]));
           if (!rollTable) {
             ui.notifications.error(
                 game.i18n.format('D35E.ErrorActionFormula', {
@@ -5265,7 +5265,7 @@ export class ActorPF extends Actor {
   async _calculateMinionDistance() {
     if (this == null) return;
     if (!this.testUserPermission(game.user, 'OWNER')) return;
-    if (this.data.type === 'npc') {
+    if (this.type === 'npc') {
       let myToken = this.getActiveTokens()[0];
       let masterId = this.system?.master?.id;
       let master = game.actors.get(masterId);
@@ -5294,7 +5294,7 @@ export class ActorPF extends Actor {
             {stopUpdates: true, skipToken: true, skipMinions: true});
         this.update(masterData, {stopUpdates: true, skipToken: true});
       }
-    } else if (this.data.type === 'character') {
+    } else if (this.type === 'character') {
       let myToken = this.getActiveTokens()[0];
       let minionData = {
         data: {
